@@ -1,0 +1,1 @@
+"""ChitraAI application package."""
