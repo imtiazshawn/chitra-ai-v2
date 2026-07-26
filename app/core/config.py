@@ -16,11 +16,19 @@ class Settings(BaseSettings):
     app_env: str = Field(default="development", alias="APP_ENV")
     debug: bool = Field(default=True, alias="DEBUG")
 
-    # Database
-    database_url: SecretStr = Field(
-        default=SecretStr("postgresql://localhost:5432/chitraai"),
-        alias="DATABASE_URL",
+    # Supabase
+    supabase_url: str = Field(default="", alias="SUPABASE_URL")
+    supabase_anon_key: SecretStr = Field(
+        default=SecretStr(""),
+        alias="SUPABASE_ANON_KEY",
     )
+    supabase_service_role_key: SecretStr = Field(
+        default=SecretStr(""),
+        alias="SUPABASE_SERVICE_ROLE_KEY",
+    )
+
+    # PostgreSQL (Supabase connection string from dashboard → Database → URI)
+    database_url: SecretStr = Field(default=SecretStr(""), alias="DATABASE_URL")
 
     # Redis & Celery
     redis_url: str = Field(default="redis://localhost:6379/0", alias="REDIS_URL")
