@@ -11,7 +11,7 @@ router = APIRouter()
 async def health_check() -> dict[str, str | bool]:
     redis_ok = await ping_redis()
     supabase_ok = await ping_supabase()
-    database_ok = ping_database()
+    database_ok = await ping_database()
 
     checks = {"redis": redis_ok, "supabase": supabase_ok, "database": database_ok}
     all_ok = all(checks.values())

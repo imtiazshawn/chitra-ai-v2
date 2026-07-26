@@ -29,9 +29,10 @@ async def ping_supabase() -> bool:
         return False
 
     url = f"{settings.supabase_url.rstrip('/')}/auth/v1/health"
+    headers = {"apikey": settings.supabase_anon_key.get_secret_value()}
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
-            response = await client.get(url)
+            response = await client.get(url, headers=headers)
             return response.status_code == 200
     except httpx.HTTPError:
         return False

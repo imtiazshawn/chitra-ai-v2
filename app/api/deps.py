@@ -1,7 +1,7 @@
-from collections.abc import AsyncGenerator, Generator
+from collections.abc import AsyncGenerator
 
 from redis.asyncio import Redis
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from supabase import Client
 
 from app.core.redis import get_redis
@@ -14,8 +14,9 @@ async def redis_client() -> AsyncGenerator[Redis, None]:
     yield client
 
 
-def db_session() -> Generator[Session, None, None]:
-    yield from get_db()
+async def db_session() -> AsyncGenerator[AsyncSession, None]:
+    async for session in get_db():
+        yield session
 
 
 def supabase_admin() -> Client:
