@@ -15,7 +15,7 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
-database_url = settings.database_url.get_secret_value().replace(
+database_url = settings.direct_url.get_secret_value().replace(
     "postgresql://", "postgresql+asyncpg://"
 )
 

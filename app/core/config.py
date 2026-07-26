@@ -27,8 +27,9 @@ class Settings(BaseSettings):
         alias="SUPABASE_SERVICE_ROLE_KEY",
     )
 
-    # PostgreSQL (Supabase connection string from dashboard → Database → URI)
+    # PostgreSQL
     database_url: SecretStr = Field(default=SecretStr(""), alias="DATABASE_URL")
+    direct_url: SecretStr = Field(default=SecretStr(""), alias="DIRECT_URL")
 
     # Redis & Celery
     redis_url: str = Field(default="redis://localhost:6379/0", alias="REDIS_URL")
