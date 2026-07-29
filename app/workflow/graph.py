@@ -5,6 +5,7 @@ from typing import Any
 
 from langgraph.graph import END, START, StateGraph
 
+from app.workflow.nodes.script import generate_script_node
 from app.workflow.state import Nodes, PipelineState
 
 logger = logging.getLogger(__name__)
@@ -15,9 +16,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 def generate_script(state: PipelineState) -> dict[str, Any]:
-    """Module 2.2 — calls Gemini/Groq to produce a structured script."""
-    logger.info("[%s] generate_script: stub", state.job_id)
-    return {"script": {}}
+    return generate_script_node(state)
 
 
 def generate_audio(state: PipelineState) -> dict[str, Any]:
