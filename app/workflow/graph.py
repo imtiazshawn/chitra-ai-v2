@@ -7,6 +7,7 @@ from langgraph.graph import END, START, StateGraph
 
 from app.workflow.nodes.audio import generate_audio_node
 from app.workflow.nodes.script import generate_script_node
+from app.workflow.nodes.sync import sync_captions_node
 from app.workflow.state import Nodes, PipelineState
 
 logger = logging.getLogger(__name__)
@@ -25,9 +26,7 @@ def generate_audio(state: PipelineState) -> dict[str, Any]:
 
 
 def sync_captions(state: PipelineState) -> dict[str, Any]:
-    """Module 2.4 — runs Whisper forced-alignment, returns timing manifest."""
-    logger.info("[%s] sync_captions: stub", state.job_id)
-    return {"manifest": {}}
+    return sync_captions_node(state)
 
 
 def fetch_assets(state: PipelineState) -> dict[str, Any]:

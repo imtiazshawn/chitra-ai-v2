@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 from pydantic import BaseModel, Field
 
+from app.workflow.schemas.manifest import Manifest
 from app.workflow.schemas.script import Script
 
 
@@ -34,7 +35,7 @@ class PipelineState(BaseModel):
     audio_path: str | None              = Field(None, description="Local/remote path to audio file")
 
     # ── Node: sync_captions ─────────────────────────────────────────────────
-    manifest: dict[str, Any] | None     = Field(None, description="Word-level caption timing manifest")
+    manifest: Manifest | None           = Field(None, description="Word-level caption timing manifest")
 
     # ── Node: fetch_assets ──────────────────────────────────────────────────
     asset_links: list[str] | None       = Field(None, description="URLs/paths of fetched media assets")
