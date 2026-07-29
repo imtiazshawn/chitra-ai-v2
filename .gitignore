@@ -1,6 +1,20 @@
+# Virtual env
 venv/
+
+# Environment
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Generated outputs
+outputs/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Alembic
+alembic/versions/*.pyc

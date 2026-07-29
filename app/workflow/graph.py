@@ -5,6 +5,7 @@ from typing import Any
 
 from langgraph.graph import END, START, StateGraph
 
+from app.workflow.nodes.audio import generate_audio_node
 from app.workflow.nodes.script import generate_script_node
 from app.workflow.state import Nodes, PipelineState
 
@@ -20,9 +21,7 @@ def generate_script(state: PipelineState) -> dict[str, Any]:
 
 
 def generate_audio(state: PipelineState) -> dict[str, Any]:
-    """Module 2.3 — calls ElevenLabs TTS, returns audio file path."""
-    logger.info("[%s] generate_audio: stub", state.job_id)
-    return {"audio_path": ""}
+    return generate_audio_node(state)
 
 
 def sync_captions(state: PipelineState) -> dict[str, Any]:
