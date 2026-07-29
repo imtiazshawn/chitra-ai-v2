@@ -7,6 +7,7 @@ from langgraph.graph import END, START, StateGraph
 
 from app.workflow.nodes.assets import fetch_assets_node
 from app.workflow.nodes.audio import generate_audio_node
+from app.workflow.nodes.render import render_video_node
 from app.workflow.nodes.script import generate_script_node
 from app.workflow.nodes.sync import sync_captions_node
 from app.workflow.state import Nodes, PipelineState
@@ -35,9 +36,7 @@ def fetch_assets(state: PipelineState) -> dict[str, Any]:
 
 
 def render_video(state: PipelineState) -> dict[str, Any]:
-    """Module 2.6 — runs MoviePy/FFmpeg pipeline, returns output video path."""
-    logger.info("[%s] render_video: stub", state.job_id)
-    return {"output_video_path": ""}
+    return render_video_node(state)
 
 
 # ---------------------------------------------------------------------------

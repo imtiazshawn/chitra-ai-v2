@@ -72,8 +72,17 @@ def _download_clip(url: str, dest: Path) -> None:
 
 # ---------------------------------------------------------------------------
 # Fetch + download one clip for a line
+# Tries each tag; skips videos already used by other lines to maximise variety.
+# Falls back to a reused video only if every query returns already-seen ids.
 # ---------------------------------------------------------------------------
-def _fetch_clip_for_line(line_id: int, tags: list[str], job_id: str, id_to_path: dict[int, str]) -> AssetClip | None:
+def _fetch_clip_for_line(
+    line_id: int,
+    tags: list[str],
+    job_id: str,
+    id_to_path: dict[int, str],
+) -> AssetClip | None:
+    fallback: tuple | None = None  # (video, best_file, query) — first seen-id result
+
     for query in tags:
         try:
             data   = _search_pexels(query)
@@ -81,33 +90,48 @@ def _fetch_clip_for_line(line_id: int, tags: list[str], job_id: str, id_to_path:
             if not videos:
                 continue
 
-            video     = videos[0]
-            best_file = _pick_best_file(video)
-            if not best_file:
-                continue
+            # walk results to find a fresh (unseen) video
+            for video in videos:
+                best_file = _pick_best_file(video)
+                if not best_file:
+                    continue
+                video_id = video["id"]
 
-            video_id = video["id"]
-            dest     = ASSETS_DIR / f"{job_id}_line{line_id}.mp4"
+                if video_id not in id_to_path:
+                    # fresh video — download it
+                    dest = ASSETS_DIR / f"{job_id}_line{line_id}.mp4"
+                    logger.info("[%s] downloading clip for line %d: %s", job_id, line_id, query)
+                    _download_clip(best_file["link"], dest)
+                    return AssetClip(
+                        line_id=line_id,
+                        query=query,
+                        pexels_video_id=video_id,
+                        local_path=str(dest),
+                        duration=float(video.get("duration", 0)),
+                        width=best_file.get("width", 0),
+                        height=best_file.get("height", 0),
+                    )
+                elif fallback is None:
+                    fallback = (video, best_file, query)
 
-            # reuse already-downloaded file if same video_id seen before
-            if video_id in id_to_path:
-                logger.info("[%s] line %d: reusing cached clip (id=%d)", job_id, line_id, video_id)
-            else:
-                logger.info("[%s] downloading clip for line %d: %s", job_id, line_id, query)
-                _download_clip(best_file["link"], dest)
-
-            return AssetClip(
-                line_id=line_id,
-                query=query,
-                pexels_video_id=video_id,
-                local_path=id_to_path.get(video_id, str(dest)),
-                duration=float(video.get("duration", 0)),
-                width=best_file.get("width", 0),
-                height=best_file.get("height", 0),
-            )
         except Exception as exc:
             logger.warning("[%s] query %r failed: %s", job_id, query, exc)
             continue
+
+    # all queries returned already-seen videos — reuse the first cached one
+    if fallback:
+        video, best_file, query = fallback
+        video_id = video["id"]
+        logger.info("[%s] line %d: reusing cached clip (id=%d)", job_id, line_id, video_id)
+        return AssetClip(
+            line_id=line_id,
+            query=query,
+            pexels_video_id=video_id,
+            local_path=id_to_path[video_id],
+            duration=float(video.get("duration", 0)),
+            width=best_file.get("width", 0),
+            height=best_file.get("height", 0),
+        )
 
     logger.warning("[%s] no clip found for line %d (tags: %s)", job_id, line_id, tags)
     return None
