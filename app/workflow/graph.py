@@ -5,6 +5,7 @@ from typing import Any
 
 from langgraph.graph import END, START, StateGraph
 
+from app.workflow.nodes.assets import fetch_assets_node
 from app.workflow.nodes.audio import generate_audio_node
 from app.workflow.nodes.script import generate_script_node
 from app.workflow.nodes.sync import sync_captions_node
@@ -30,9 +31,7 @@ def sync_captions(state: PipelineState) -> dict[str, Any]:
 
 
 def fetch_assets(state: PipelineState) -> dict[str, Any]:
-    """Module 2.5 — queries Pexels API, returns list of asset URLs."""
-    logger.info("[%s] fetch_assets: stub", state.job_id)
-    return {"asset_links": []}
+    return fetch_assets_node(state)
 
 
 def render_video(state: PipelineState) -> dict[str, Any]:
