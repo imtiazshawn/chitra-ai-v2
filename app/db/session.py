@@ -1,15 +1,39 @@
 from collections.abc import AsyncGenerator
 
-from sqlalchemy import text
+from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
     async_sessionmaker,
     create_async_engine,
 )
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from app.core.config import settings
+
+# ---------------------------------------------------------------------------
+# Sync engine — used by Celery workers (no async runtime)
+# ---------------------------------------------------------------------------
+_sync_engine = None
+_sync_session_factory = None
+
+
+def _get_sync_engine():
+    global _sync_engine
+    if _sync_engine is None:
+        url = settings.database_url.get_secret_value()
+        sync_url = url.replace("postgresql+asyncpg://", "postgresql://").replace("postgresql://", "postgresql+psycopg2://")
+        _sync_engine = create_engine(sync_url, pool_pre_ping=True)
+    return _sync_engine
+
+
+SyncSession: sessionmaker[Session] = sessionmaker(
+    bind=None, autocommit=False, autoflush=False, expire_on_commit=False
+)
+
+
+def _init_sync_session() -> None:
+    SyncSession.configure(bind=_get_sync_engine())
 
 _engine: AsyncEngine | None = None
 _session_factory: async_sessionmaker[AsyncSession] | None = None
@@ -17,6 +41,9 @@ _session_factory: async_sessionmaker[AsyncSession] | None = None
 
 class Base(DeclarativeBase):
     pass
+
+
+_init_sync_session()  # bind sync engine on import
 
 
 def _get_engine() -> AsyncEngine:

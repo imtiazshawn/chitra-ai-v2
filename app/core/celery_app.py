@@ -40,10 +40,8 @@ celery_app = Celery(
     broker=settings.celery_broker_url,
     backend=settings.celery_result_backend,
     include=[
+        "app.tasks.generate",
         "app.tasks.example",
-        # register new task modules here as you add them
-        # "app.tasks.io.assets",
-        # "app.tasks.cpu.render",
     ],
 )
 
