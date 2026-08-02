@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from app.services.video_storage import upload_rendered_video
 from app.workflow.utils.ffmpeg import burn_subtitles, concatenate, mix_audio, trim_and_scale
 from app.workflow.utils.subtitle import build_ass
 
@@ -80,7 +81,10 @@ def render_video_node(state: Any) -> dict[str, Any]:
         for f in [concat_path, mixed_path, ass_path] + trimmed:
             f.unlink(missing_ok=True)
 
-        return {"output_video_path": str(final_path)}
+        video_url = upload_rendered_video(final_path, job_id)
+        logger.info("[%s] uploaded to Supabase Storage: %s", job_id, video_url)
+
+        return {"video_url": video_url}
 
     except Exception as exc:
         logger.error("[%s] render_video failed: %s", job_id, exc)

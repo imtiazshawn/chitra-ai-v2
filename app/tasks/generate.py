@@ -37,6 +37,7 @@ def _update_job(
     status: JobStatus,
     step_data: dict | None = None,
     error: str | None = None,
+    video_url: str | None = None,
 ) -> None:
     values: dict = {
         "status": status,
@@ -46,6 +47,8 @@ def _update_job(
         values["current_step_data"] = step_data
     if error is not None:
         values["error_message"] = error
+    if video_url is not None:
+        values["video_url"] = video_url
 
     session.execute(update(Job).where(Job.id == uuid.UUID(job_id)).values(**values))
     session.commit()
@@ -134,7 +137,7 @@ def run_pipeline(self, job_id: str, topic: str) -> dict:
                     step_data["clips_downloaded"] = len(getattr(asset_links, "clips", []))
 
             elif node_name == "render_video" and isinstance(node_output, dict):
-                step_data["output_video_path"] = node_output.get("output_video_path")
+                step_data["video_url"] = node_output.get("video_url")
 
             # Check for pipeline-level error returned by a node
             if isinstance(node_output, dict) and node_output.get("error"):
@@ -144,7 +147,12 @@ def run_pipeline(self, job_id: str, topic: str) -> dict:
                 logger.error("[%s] node %s returned error: %s", job_id, node_name, error_msg)
                 return {"job_id": job_id, "status": "FAILED", "error": error_msg}
 
-            _update_job(session, job_id, status, step_data)
+            render_video_url = (
+                node_output.get("video_url")
+                if node_name == "render_video" and isinstance(node_output, dict)
+                else None
+            )
+            _update_job(session, job_id, status, step_data, video_url=render_video_url)
             logger.info("[%s] ✓ %-20s  progress=%d%%", job_id, node_name, progress)
 
         # All nodes completed — mark COMPLETED

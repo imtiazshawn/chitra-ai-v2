@@ -84,12 +84,10 @@ def main():
         print("FAILED:", result["error"])
         return
 
-    output = result["output_video_path"]
-    size_mb = Path(output).stat().st_size / (1024 * 1024)
-    print(f"Output   : {output}")
-    print(f"Size     : {size_mb:.1f} MB")
+    video_url = result.get("video_url")
+    print(f"Video URL: {video_url}")
     print("-" * 60)
-    print("PASSED — open the file to watch the video")
+    print("PASSED — open the URL to watch the video")
 
 
 if __name__ == "__main__":

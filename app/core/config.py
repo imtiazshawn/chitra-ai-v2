@@ -26,6 +26,10 @@ class Settings(BaseSettings):
         default=SecretStr(""),
         alias="SUPABASE_SERVICE_ROLE_KEY",
     )
+    supabase_video_bucket: str = Field(
+        default="chitra-ai-generated-reels",
+        alias="SUPABASE_VIDEO_BUCKET",
+    )
 
     # PostgreSQL
     database_url: SecretStr = Field(default=SecretStr(""), alias="DATABASE_URL")

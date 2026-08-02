@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import uuid
-from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -91,17 +90,11 @@ async def get_job(
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
 
-    video_url = None
-    if job.status == JobStatus.COMPLETED:
-        video_path = Path(f"outputs/video/{job.id}.mp4")
-        if video_path.exists():
-            video_url = f"/outputs/video/{job.id}.mp4"
-
     return JobStatusResponse(
         job_id=str(job.id),
         topic=job.topic,
         status=job.status,
         progress=_PROGRESS.get(job.status, 0),
-        video_url=video_url,
+        video_url=job.video_url,
         error_message=job.error_message,
     )
